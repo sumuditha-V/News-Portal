@@ -15,6 +15,8 @@ public class AppDbContext : DbContext
         {
             e.HasIndex(u => u.Username).IsUnique();
             e.Property(u => u.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            e.Property(u => u.FullName).HasDefaultValue(string.Empty);
+            e.Property(u => u.Email).HasDefaultValue(string.Empty);
         });
     }
 }
