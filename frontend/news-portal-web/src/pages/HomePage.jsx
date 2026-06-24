@@ -1,11 +1,10 @@
 import { useNavigate } from 'react-router-dom'
-import heroBg from '../assets/hero-bg.jpg'
 
 export default function HomePage() {
   const navigate = useNavigate()
 
   return (
-    <div className="home-page" style={{ backgroundImage: `url(${heroBg})` }}>
+    <div className="home-page" style={{ backgroundImage: `url('/bsckground.png')` }}>
       {/* Dark overlay */}
       <div className="home-overlay" />
 
@@ -26,14 +25,14 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="home-nav-links">
-            <a href="/" className="home-nav-link active">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
-              Home
-            </a>
+          {/* Nav buttons — Sign In & Sign Up only */}
+          <div className="home-nav-auth">
+            <button id="home-nav-signin" className="home-nav-signin-btn" onClick={() => navigate('/login')}>
+              Sign In
+            </button>
+            <button id="home-nav-signup" className="home-nav-signup-btn" onClick={() => navigate('/register')}>
+              Sign Up
+            </button>
           </div>
         </div>
       </nav>
@@ -60,29 +59,13 @@ export default function HomePage() {
             <button
               id="btn-explore-news"
               className="home-btn-primary"
-              onClick={() => navigate('/news')}
+              onClick={() => navigate('/login')}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               Explore News
-            </button>
-
-            <button
-              id="btn-signin"
-              className="home-btn-outline"
-              onClick={() => navigate('/login')}
-            >
-              Sign In
-            </button>
-
-            <button
-              id="btn-signup"
-              className="home-btn-ghost"
-              onClick={() => navigate('/login')}
-            >
-              Sign Up
             </button>
           </div>
         </div>
