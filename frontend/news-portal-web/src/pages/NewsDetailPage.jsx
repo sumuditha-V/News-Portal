@@ -44,7 +44,7 @@ export default function NewsDetailPage() {
     return () => controller.abort()
   }, [load])
 
-  const backHref = `/?category=${category}&country=${country}`
+  const backHref = `/news?category=${category}&country=${country}`
 
   return (
     <div className="container detail">
