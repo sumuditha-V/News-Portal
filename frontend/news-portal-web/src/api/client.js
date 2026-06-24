@@ -21,7 +21,8 @@ api.interceptors.response.use(
   (err) => {
     if (err.response?.status === 401) {
       clearAuth()
-      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+      const path = window.location.pathname
+      if (typeof window !== 'undefined' && path !== '/login' && path !== '/register' && path !== '/') {
         window.location.assign('/login')
       }
     }
