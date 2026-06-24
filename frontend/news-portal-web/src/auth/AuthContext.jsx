@@ -24,13 +24,20 @@ export function AuthProvider({ children }) {
     return data
   }, [])
 
+  const register = useCallback(async (payload) => {
+    const { data } = await api.post('/api/auth/register', payload)
+    setAuth({ token: data.token, username: data.username, expiresAt: data.expiresAt })
+    setUsername(data.username)
+    return data
+  }, [])
+
   const logout = useCallback(() => {
     clearAuth()
     setUsername(null)
   }, [])
 
   return (
-    <AuthContext.Provider value={{ username, isAuthenticated: !!username, login, logout }}>
+    <AuthContext.Provider value={{ username, isAuthenticated: !!username, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )

@@ -2,8 +2,9 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
-import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage'
+import SignUpPage from './pages/SignUpPage'
 import NewsListPage from './pages/NewsListPage'
 import NewsDetailPage from './pages/NewsDetailPage'
 
@@ -15,8 +16,9 @@ export default function App() {
           {/* Public routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<SignUpPage />} />
 
-          {/* Protected routes */}
+          {/* Protected routes — wrapped in Layout */}
           <Route
             element={
               <ProtectedRoute>
