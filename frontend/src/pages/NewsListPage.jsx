@@ -86,7 +86,7 @@ export default function NewsListPage() {
       </div>
 
       {loading && <Spinner label="Loading news" />}
-      {error && <ErrorBanner message={error} onRetry={() => load()} />}
+      {error && <ErrorBanner message={error} onRetry={() => { const ctrl = new AbortController(); load(ctrl.signal) }} />}
 
       {!loading && !error && articles.length === 0 && (
         <p className="muted">No articles available for this selection.</p>

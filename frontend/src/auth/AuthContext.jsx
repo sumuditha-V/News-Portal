@@ -1,43 +1,51 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { api } from '../api/client'
-import { clearAuth, getToken, getUsername, setAuth } from './storage'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [username, setUsername] = useState(() => (getToken() ? getUsername() : null))
+  const [username, setUsername] = useState(null)
+  const [initializing, setInitializing] = useState(true)
 
   useEffect(() => {
-    const onStorage = (e) => {
-      if (e.key === 'np_token') {
-        setUsername(getToken() ? getUsername() : null)
-      }
+    let active = true
+    api.get('/api/auth/me')
+      .then(({ data }) => {
+        if (active) setUsername(data.username)
+      })
+      .catch(() => {
+        if (active) setUsername(null)
+      })
+      .finally(() => {
+        if (active) setInitializing(false)
+      })
+    return () => {
+      active = false
     }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
   }, [])
 
   const login = useCallback(async (u, p) => {
     const { data } = await api.post('/api/auth/login', { username: u, password: p })
-    setAuth({ token: data.token, username: data.username, expiresAt: data.expiresAt })
     setUsername(data.username)
     return data
   }, [])
 
   const register = useCallback(async (payload) => {
     const { data } = await api.post('/api/auth/register', payload)
-    setAuth({ token: data.token, username: data.username, expiresAt: data.expiresAt })
     setUsername(data.username)
     return data
   }, [])
 
-  const logout = useCallback(() => {
-    clearAuth()
-    setUsername(null)
+  const logout = useCallback(async () => {
+    try {
+      await api.post('/api/auth/logout')
+    } finally {
+      setUsername(null)
+    }
   }, [])
 
   return (
-    <AuthContext.Provider value={{ username, isAuthenticated: !!username, login, register, logout }}>
+    <AuthContext.Provider value={{ username, isAuthenticated: !!username, initializing, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )

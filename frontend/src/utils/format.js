@@ -20,3 +20,13 @@ export function extractErrorMessage(err, fallback = 'Something went wrong.') {
   if (err.message) return err.message
   return fallback
 }
+
+export function safeHttpUrl(value) {
+  if (!value) return null
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : null
+  } catch {
+    return null
+  }
+}

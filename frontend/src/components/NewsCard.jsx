@@ -1,17 +1,18 @@
 import { Link } from 'react-router-dom'
-import { formatDate } from '../utils/format'
+import { formatDate, safeHttpUrl } from '../utils/format'
 
 export default function NewsCard({ article, listParams }) {
   const search = new URLSearchParams(listParams).toString()
   const to = `/news/${article.id}${search ? `?${search}` : ''}`
+  const imageUrl = safeHttpUrl(article.urlToImage)
 
   return (
     <article className="news-card">
       <Link to={to} className="news-card-link">
-        {article.urlToImage ? (
+        {imageUrl ? (
           <img
             className="news-card-image"
-            src={article.urlToImage}
+            src={imageUrl}
             alt=""
             loading="lazy"
             onError={(e) => { e.currentTarget.style.display = 'none' }}

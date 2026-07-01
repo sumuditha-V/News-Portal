@@ -3,7 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client'
 import Spinner from '../components/Spinner'
 import ErrorBanner from '../components/ErrorBanner'
-import { extractErrorMessage, formatDate } from '../utils/format'
+import { extractErrorMessage, formatDate, safeHttpUrl } from '../utils/format'
 
 export default function NewsDetailPage() {
   const { id } = useParams()
@@ -19,15 +19,12 @@ export default function NewsDetailPage() {
     setLoading(true)
     setError(null)
     try {
-      const { data } = await api.get(`/api/news/${id}`, {
-        params: { category, country },
-        signal,
-      })
+      const { data } = await api.get(`/api/news/${id}`, { signal })
       setArticle(data)
     } catch (err) {
       if (err.name !== 'CanceledError' && err.code !== 'ERR_CANCELED') {
         if (err.response?.status === 404) {
-          setError('This article is no longer in the current feed.')
+          setError('Article not found.')
         } else {
           setError(extractErrorMessage(err, 'Failed to load article.'))
         }
@@ -36,7 +33,7 @@ export default function NewsDetailPage() {
     } finally {
       setLoading(false)
     }
-  }, [id, category, country])
+  }, [id])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -45,13 +42,14 @@ export default function NewsDetailPage() {
   }, [load])
 
   const backHref = `/news?category=${category}&country=${country}`
+  const imageUrl = safeHttpUrl(article?.urlToImage)
 
   return (
     <div className="container detail">
       <Link to={backHref} className="back-link">&larr; Back to headlines</Link>
 
       {loading && <Spinner label="Loading article" />}
-      {error && <ErrorBanner message={error} onRetry={() => load()} />}
+      {error && <ErrorBanner message={error} onRetry={() => { const ctrl = new AbortController(); load(ctrl.signal) }} />}
 
       {!loading && !error && article && (
         <article className="article">
@@ -62,10 +60,10 @@ export default function NewsDetailPage() {
             {article.author && <span>by {article.author}</span>}
           </div>
 
-          {article.urlToImage && (
+          {imageUrl && (
             <img
               className="article-image"
-              src={article.urlToImage}
+              src={imageUrl}
               alt=""
               onError={(e) => { e.currentTarget.style.display = 'none' }}
             />
