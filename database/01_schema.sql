@@ -35,6 +35,29 @@ BEGIN
 END;
 GO
 
+IF OBJECT_ID(N'[dbo].[Articles]') IS NULL
+BEGIN
+    CREATE TABLE [Articles] (
+        [Id]           uniqueidentifier NOT NULL DEFAULT (NEWSEQUENTIALID()),
+        [Url]          nvarchar(max)    NOT NULL,
+        [UrlHash]      nvarchar(64)     NOT NULL,
+        [SourceId]     nvarchar(200)    NULL,
+        [SourceName]   nvarchar(300)    NULL,
+        [Author]       nvarchar(500)    NULL,
+        [Title]        nvarchar(1000)   NOT NULL,
+        [Description]  nvarchar(max)    NULL,
+        [UrlToImage]   nvarchar(max)    NULL,
+        [PublishedAt]  datetime2        NULL,
+        [Content]      nvarchar(max)    NULL,
+        [CreatedAt]    datetime2        NOT NULL DEFAULT (SYSUTCDATETIME()),
+        [UpdatedAt]    datetime2        NOT NULL DEFAULT (SYSUTCDATETIME()),
+        CONSTRAINT [PK_Articles] PRIMARY KEY ([Id])
+    );
+
+    CREATE UNIQUE INDEX [IX_Articles_UrlHash] ON [Articles] ([UrlHash]);
+END;
+GO
+
 -- Step 4: Record applied migrations
 IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20260624113142_InitialCreate')
 BEGIN
@@ -54,5 +77,12 @@ IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'202
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
     VALUES (N'20260624133630_SyncModelSnapshot', N'10.0.9');
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20260701133814_AddPersistentArticles')
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260701133814_AddPersistentArticles', N'10.0.9');
 END;
 GO
