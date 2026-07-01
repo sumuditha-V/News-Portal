@@ -30,6 +30,14 @@ var jwtKey = jwtSection["Key"] ?? throw new InvalidOperationException("Jwt:Key i
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                context.Token = context.Request.Cookies["np_auth"];
+                return Task.CompletedTask;
+            },
+        };
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -52,7 +60,8 @@ builder.Services.AddCors(o => o.AddPolicy(CorsPolicy, p =>
                   ?? new[] { "http://localhost:5173" };
     p.WithOrigins(origins)
      .AllowAnyHeader()
-     .AllowAnyMethod();
+     .AllowAnyMethod()
+     .AllowCredentials();
 }));
 
 var app = builder.Build();

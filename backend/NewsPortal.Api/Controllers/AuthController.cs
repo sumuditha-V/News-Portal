@@ -14,11 +14,13 @@ public class AuthController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly JwtTokenService _jwt;
+    private readonly IWebHostEnvironment _environment;
 
-    public AuthController(AppDbContext db, JwtTokenService jwt)
+    public AuthController(AppDbContext db, JwtTokenService jwt, IWebHostEnvironment environment)
     {
         _db = db;
         _jwt = jwt;
+        _environment = environment;
     }
 
     // POST /api/auth/register
@@ -51,9 +53,9 @@ public class AuthController : ControllerBase
         await _db.SaveChangesAsync(ct);
 
         var (token, expires) = _jwt.Generate(user);
+        SetAuthCookie(token, expires);
         return Ok(new LoginResponse
         {
-            Token = token,
             Username = user.Username,
             FullName = user.FullName,
             ExpiresAt = expires,
@@ -75,9 +77,9 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Invalid username or password." });
 
         var (token, expires) = _jwt.Generate(user);
+        SetAuthCookie(token, expires);
         return Ok(new LoginResponse
         {
-            Token = token,
             Username = user.Username,
             FullName = user.FullName,
             ExpiresAt = expires,
@@ -91,5 +93,31 @@ public class AuthController : ControllerBase
     {
         var username = User.Identity?.Name ?? string.Empty;
         return Ok(new { username });
+    }
+
+    [HttpPost("logout")]
+    [AllowAnonymous]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("np_auth", BuildCookieOptions());
+        return NoContent();
+    }
+
+    private void SetAuthCookie(string token, DateTime expires)
+    {
+        var options = BuildCookieOptions();
+        options.Expires = new DateTimeOffset(expires);
+        Response.Cookies.Append("np_auth", token, options);
+    }
+
+    private CookieOptions BuildCookieOptions()
+    {
+        return new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = !_environment.IsDevelopment(),
+            SameSite = SameSiteMode.Lax,
+            Path = "/",
+        };
     }
 }

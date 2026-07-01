@@ -8,6 +8,7 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<Article> Articles => Set<Article>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -17,6 +18,14 @@ public class AppDbContext : DbContext
             e.Property(u => u.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
             e.Property(u => u.FullName).HasDefaultValue(string.Empty);
             e.Property(u => u.Email).HasDefaultValue(string.Empty);
+        });
+
+        modelBuilder.Entity<Article>(e =>
+        {
+            e.HasIndex(a => a.UrlHash).IsUnique();
+            e.Property(a => a.Id).HasDefaultValueSql("NEWSEQUENTIALID()");
+            e.Property(a => a.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            e.Property(a => a.UpdatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
         });
     }
 }

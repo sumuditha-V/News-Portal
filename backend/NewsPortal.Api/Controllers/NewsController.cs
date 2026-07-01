@@ -36,22 +36,12 @@ public class NewsController : ControllerBase
 
     [HttpGet("{id}")]
     public async Task<ActionResult<NewsArticleDto>> Detail(
-        string id,
-        [FromQuery] string category = "general",
-        [FromQuery] string country = "us",
+        Guid id,
         CancellationToken ct = default)
     {
-        try
-        {
-            var result = await _news.GetTopHeadlinesAsync(category, country, ct);
-            var article = result.Articles.FirstOrDefault(a => a.Id == id);
-            if (article is null)
-                return NotFound(new { message = "Article not found in current feed" });
-            return Ok(article);
-        }
-        catch (HttpRequestException ex)
-        {
-            return StatusCode(StatusCodes.Status502BadGateway, new { message = "Upstream news provider unavailable", detail = ex.Message });
-        }
+        var article = await _news.GetByIdAsync(id, ct);
+        if (article is null)
+            return NotFound(new { message = "Article not found" });
+        return Ok(article);
     }
 }
