@@ -72,10 +72,11 @@ On startup the backend:
 
 | Method | Path                      | Auth | Description                                              |
 |--------|---------------------------|------|----------------------------------------------------------|
-| POST   | `/api/auth/login`         | No   | Returns a JWT for valid credentials.                     |
+| POST   | `/api/auth/login`         | No   | Creates an HttpOnly authentication cookie.               |
+| POST   | `/api/auth/logout`        | No   | Clears the authentication cookie.                        |
 | GET    | `/api/auth/me`            | Yes  | Returns the current user's username.                     |
 | GET    | `/api/news`               | Yes  | Top headlines. Query: `category`, `country`.             |
-| GET    | `/api/news/{id}`          | Yes  | Single article from the current feed.                    |
+| GET    | `/api/news/{id}`          | Yes  | Single persisted article by UUID.                        |
 
 Supported categories: `general`, `business`, `entertainment`, `health`, `science`, `sports`, `technology`. Supported countries: see `Services/NewsService.cs`.
 
@@ -117,6 +118,6 @@ Frontend (`frontend/news-portal-web/.env`):
 
 ## Notes
 
-- The article `id` is a stable SHA-1 of the upstream URL + published timestamp + title. The upstream feed has no IDs of its own, so the detail page refetches the same feed (category/country are carried in the query string) and looks the article up by that derived ID. If the feed rotates an article out, the detail page shows a "no longer in feed" message.
+- Articles are stored in SQL Server with permanent UUIDs. Feed refreshes update matching source URLs without changing their UUIDs, and saved detail links continue to resolve after an article leaves the upstream feed.
 - Passwords are stored as BCrypt hashes (cost 11). The login endpoint returns a generic "invalid credentials" message; no user-existence leak.
-- JWTs are stored in `localStorage` for simplicity. A 401 response from the API clears local state and redirects to `/login`.
+- JWTs are sent only in HttpOnly cookies and are never exposed to frontend JavaScript.
